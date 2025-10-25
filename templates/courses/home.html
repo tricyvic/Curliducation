@@ -1,0 +1,559 @@
+{% extends 'base.html' %}
+
+{% block title %}Chef Course Platform{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container">
+        <div class="row align-items-center min-vh-75">
+            <div class="col-lg-6 text-white">
+                <h1 class="display-3 fw-bold mb-4 animate-fade-in">Master the Art of Cooking</h1>
+                <p class="lead mb-4 fs-4">Learn from world-class chefs. Access exclusive courses, recipes, and culinary books that will transform your cooking skills.</p>
+                {% if not user.is_authenticated %}
+                    <div class="d-grid gap-3 d-md-flex mb-4">
+                        <a href="{% url 'register_student' %}" class="btn btn-light btn-lg px-4">
+                            <i class="bi bi-person-plus"></i> Get Started Free
+                        </a>
+                        <a href="{% url 'course_list' %}" class="btn btn-outline-light btn-lg px-4">
+                            <i class="bi bi-search"></i> Browse Courses
+                        </a>
+                    </div>
+                    <p class="text-white-50">
+                        <small>Are you a chef? <a href="{% url 'register_chef' %}" class="text-white fw-bold">Start Teaching Today</a></small>
+                    </p>
+                {% else %}
+                    <div class="d-grid gap-3 d-md-flex">
+                        {% if user.is_chef %}
+                            <a href="{% url 'chef_dashboard' %}" class="btn btn-light btn-lg px-4">
+                                <i class="bi bi-speedometer2"></i> Go to Dashboard
+                            </a>
+                            <a href="{% url 'course_create' %}" class="btn btn-outline-light btn-lg px-4">
+                                <i class="bi bi-plus-circle"></i> Create Course
+                            </a>
+                        {% else %}
+                            <a href="{% url 'course_list' %}" class="btn btn-light btn-lg px-4">
+                                <i class="bi bi-book"></i> Browse Courses
+                            </a>
+                            <a href="{% url 'my_courses' %}" class="btn btn-outline-light btn-lg px-4">
+                                <i class="bi bi-journals"></i> My Courses
+                            </a>
+                        {% endif %}
+                        
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col-lg-6 text-center d-none d-lg-block">
+                <div class="hero-illustration">
+                    <i class="bi bi-mortarboard-fill hero-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Section -->
+<div class="stats-section py-5 bg-white">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3 mb-4 mb-md-0">
+                <div class="stat-item">
+                    <i class="bi bi-book-fill text-primary display-4 mb-3"></i>
+                    <h3 class="fw-bold">{{ total_courses|default:"50+" }}</h3>
+                    <p class="text-muted">Cooking Courses</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4 mb-md-0">
+                <div class="stat-item">
+                    <i class="bi bi-people-fill text-success display-4 mb-3"></i>
+                    <h3 class="fw-bold">{{ total_students|default:"10,000+" }}</h3>
+                    <p class="text-muted">Happy Students</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4 mb-md-0">
+                <div class="stat-item">
+                    <i class="bi bi-award-fill text-warning display-4 mb-3"></i>
+                    <h3 class="fw-bold">{{ total_chefs|default:"100+" }}</h3>
+                    <p class="text-muted">Expert Chefs</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <i class="bi bi-journal-text text-danger display-4 mb-3"></i>
+                    <h3 class="fw-bold">{{ total_recipes|default:"500+" }}</h3>
+                    <p class="text-muted">Exclusive Recipes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Courses Section -->
+<div class="featured-courses py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold">Featured Courses</h2>
+            <p class="lead text-muted">Explore our most popular cooking courses</p>
+        </div>
+        
+        {% if featured_courses %}
+            <div class="row">
+                {% for course in featured_courses %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card course-card h-100 shadow-sm border-0">
+                            {% if course.thumbnail %}
+                                <img src="{{ course.thumbnail.url }}" class="card-img-top course-thumbnail" alt="{{ course.title }}">
+                            {% else %}
+                                <div class="card-img-top course-thumbnail-placeholder">
+                                    <i class="bi bi-camera-fill"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="card-body d-flex flex-column">
+                                <div class="mb-2">
+                                    <span class="badge bg-info-subtle text-info-emphasis">{{ course.get_level_display }}</span>
+                                    <span class="badge bg-success-subtle text-success-emphasis">
+                                        <i class="bi bi-star-fill"></i> Featured
+                                    </span>
+                                </div>
+                                
+                                <h5 class="card-title fw-bold mb-2">{{ course.title }}</h5>
+                                <p class="card-text text-muted flex-grow-1">{{ course.short_description|truncatewords:20 }}</p>
+                                
+                                <div class="course-meta mb-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="bi bi-person-circle text-primary me-2"></i>
+                                        <small class="text-muted">{{ course.chef.get_full_name|default:course.chef.username }}</small>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <small class="text-muted">
+                                            <i class="bi bi-clock"></i> {{ course.duration_hours }}h
+                                        </small>
+                                        <small class="text-muted">
+                                            <i class="bi bi-people"></i> {{ course.get_enrolled_count }} students
+                                        </small>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="h4 text-primary mb-0 fw-bold">${{ course.price }}</span>
+                                    <a href="{% url 'course_detail' course.slug %}" class="btn btn-primary">
+                                        View Details <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="{% url 'course_list' %}" class="btn btn-outline-primary btn-lg">
+                    <i class="bi bi-grid-3x3-gap"></i> View All Courses
+                </a>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox text-muted" style="font-size: 80px;"></i>
+                <h4 class="mt-3 text-muted">No courses available yet</h4>
+                <p class="text-muted">Check back soon for amazing culinary courses!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="features-section py-5 bg-white">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold">Why Choose Us</h2>
+            <p class="lead text-muted">Everything you need to become a master chef</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-box text-center p-4 h-100">
+                    <div class="feature-icon-wrapper mb-4">
+                        <i class="bi bi-people-fill text-primary"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Expert Chefs</h4>
+                    <p class="text-muted">Learn from professional chefs with years of culinary experience and Michelin-star credentials.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-box text-center p-4 h-100">
+                    <div class="feature-icon-wrapper mb-4">
+                        <i class="bi bi-play-circle-fill text-success"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Video Lessons</h4>
+                    <p class="text-muted">High-quality HD video content you can watch anytime, anywhere, at your own pace.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-box text-center p-4 h-100">
+                    <div class="feature-icon-wrapper mb-4">
+                        <i class="bi bi-journal-text text-warning"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Recipes & Books</h4>
+                    <p class="text-muted">Access exclusive recipes, culinary books, and downloadable resources for your journey.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-box text-center p-4 h-100">
+                    <div class="feature-icon-wrapper mb-4">
+                        <i class="bi bi-infinity text-info"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Lifetime Access</h4>
+                    <p class="text-muted">Once enrolled, enjoy unlimited lifetime access to all course materials and future updates.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-box text-center p-4 h-100">
+                    <div class="feature-icon-wrapper mb-4">
+                        <i class="bi bi-phone text-danger"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Mobile Friendly</h4>
+                    <p class="text-muted">Learn on any device - desktop, tablet, or mobile. Your progress syncs everywhere.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-box text-center p-4 h-100">
+                    <div class="feature-icon-wrapper mb-4">
+                        <i class="bi bi-trophy-fill text-primary"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Certificates</h4>
+                    <p class="text-muted">Earn certificates of completion to showcase your newly acquired culinary skills.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Categories Section -->
+<div class="categories-section py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold">Explore by Category</h2>
+            <p class="lead text-muted">Find the perfect course for your interests</p>
+        </div>
+        
+        <div class="row g-3">
+            <div class="col-md-3 col-sm-6">
+                <a href="{% url 'course_list' %}?level=BEGINNER" class="category-card">
+                    <div class="card border-0 shadow-sm h-100 text-center p-4">
+                        <i class="bi bi-egg-fried category-icon text-success"></i>
+                        <h5 class="mt-3 mb-0">Beginner</h5>
+                        <small class="text-muted">Start your journey</small>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="col-md-3 col-sm-6">
+                <a href="{% url 'course_list' %}?level=INTERMEDIATE" class="category-card">
+                    <div class="card border-0 shadow-sm h-100 text-center p-4">
+                        <i class="bi bi-fire category-icon text-warning"></i>
+                        <h5 class="mt-3 mb-0">Intermediate</h5>
+                        <small class="text-muted">Level up skills</small>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="col-md-3 col-sm-6">
+                <a href="{% url 'course_list' %}?level=ADVANCED" class="category-card">
+                    <div class="card border-0 shadow-sm h-100 text-center p-4">
+                        <i class="bi bi-lightning-fill category-icon text-danger"></i>
+                        <h5 class="mt-3 mb-0">Advanced</h5>
+                        <small class="text-muted">Master techniques</small>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="col-md-3 col-sm-6">
+                <a href="{% url 'recipe_list' %}" class="category-card">
+                    <div class="card border-0 shadow-sm h-100 text-center p-4">
+                        <i class="bi bi-book-half category-icon text-primary"></i>
+                        <h5 class="mt-3 mb-0">Recipes</h5>
+                        <small class="text-muted">Browse collection</small>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Testimonials Section (Optional) -->
+<div class="testimonials-section py-5 bg-white">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold">What Our Students Say</h2>
+            <p class="lead text-muted">Join thousands of satisfied learners</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                        </div>
+                        <p class="card-text">"Amazing courses! I went from knowing nothing about cooking to preparing restaurant-quality meals. The instructors are fantastic!"</p>
+                        <div class="d-flex align-items-center mt-3">
+                            <div class="avatar-placeholder me-3">JD</div>
+                            <div>
+                                <h6 class="mb-0">Jane Doe</h6>
+                                <small class="text-muted">Home Cook</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                        </div>
+                        <p class="card-text">"The best investment I've made! The recipes are incredible and the step-by-step videos make everything so easy to follow."</p>
+                        <div class="d-flex align-items-center mt-3">
+                            <div class="avatar-placeholder me-3">MS</div>
+                            <div>
+                                <h6 class="mb-0">Mike Smith</h6>
+                                <small class="text-muted">Aspiring Chef</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                        </div>
+                        <p class="card-text">"I love how organized everything is. The platform is user-friendly and the quality of content is outstanding. Highly recommend!"</p>
+                        <div class="d-flex align-items-center mt-3">
+                            <div class="avatar-placeholder me-3">SJ</div>
+                            <div>
+                                <h6 class="mb-0">Sarah Johnson</h6>
+                                <small class="text-muted">Food Enthusiast</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+{% if not user.is_authenticated %}
+<div class="cta-section py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center text-white">
+                <h2 class="display-5 fw-bold mb-4">Ready to Start Your Culinary Journey?</h2>
+                <p class="lead mb-4">Join thousands of students learning from expert chefs around the world</p>
+                <div class="d-grid gap-3 d-md-flex justify-content-center">
+                    <a href="{% url 'register_student' %}" class="btn btn-light btn-lg px-5">
+                        <i class="bi bi-person-plus"></i> Sign Up Now
+                    </a>
+                    <a href="{% url 'course_list' %}" class="btn btn-outline-light btn-lg px-5">
+                        <i class="bi bi-search"></i> Browse Courses
+                    </a>
+                </div>
+                <p class="mt-4 mb-0">
+                    <small>Are you a professional chef? <a href="{% url 'register_chef' %}" class="text-white fw-bold text-decoration-underline">Start teaching today!</a></small>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Custom Styles -->
+<style>
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+    background-size: cover;
+}
+
+.hero-icon {
+    font-size: 250px;
+    opacity: 0.2;
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 1s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Course Cards */
+.course-card {
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.course-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 1rem 3rem rgba(0,0,0,.175)!important;
+}
+
+.course-thumbnail {
+    height: 200px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.course-card:hover .course-thumbnail {
+    transform: scale(1.1);
+}
+
+.course-thumbnail-placeholder {
+    height: 200px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 60px;
+    color: rgba(255,255,255,0.3);
+}
+
+/* Feature Boxes */
+.feature-box {
+    transition: all 0.3s ease;
+    border-radius: 10px;
+}
+
+.feature-box:hover {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    transform: translateY(-5px);
+}
+
+.feature-icon-wrapper i {
+    font-size: 60px;
+}
+
+/* Category Cards */
+.category-card {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: all 0.3s ease;
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+}
+
+.category-card .card {
+    transition: all 0.3s ease;
+}
+
+.category-card:hover .card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.category-card:hover .category-icon {
+    color: white !important;
+}
+
+.category-icon {
+    font-size: 50px;
+}
+
+/* Stats Section */
+.stat-item {
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: scale(1.05);
+}
+
+/* Testimonial Avatars */
+.avatar-placeholder {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+/* CTA Section */
+.cta-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: relative;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero-section {
+        min-height: 60vh;
+        text-align: center;
+    }
+    
+    .hero-icon {
+        font-size: 150px;
+    }
+    
+    .display-3 {
+        font-size: 2.5rem;
+    }
+    
+    .display-5 {
+        font-size: 2rem;
+    }
+}
+</style>
+{% endblock %}

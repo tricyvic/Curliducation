@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Lesson{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Confirm Deletion</h4>
+                </div>
+                <div class="card-body">
+                    <p class="lead">Are you sure you want to delete this lesson?</p>
+                    
+                    <div class="alert alert-warning">
+                        <strong>Lesson:</strong> {{ class.title }}<br>
+                        <strong>Course:</strong> {{ class.course.title }}<br>
+                        <strong>Duration:</strong> {{ class.duration_minutes }} minutes
+                    </div>
+                    
+                    <p class="text-danger">
+                        <i class="bi bi-exclamation-circle"></i>
+                        <strong>Warning:</strong> This action cannot be undone.
+                    </p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                            <a href="{% url 'course_edit' class.course.slug %}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Yes, Delete Lesson
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
